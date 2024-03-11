@@ -7,7 +7,6 @@ public class WaterGenerator : MonoBehaviour
     const float playerMoveThresholdToUpdate = 25f;
     const float sqrPlayerMoveThreshholdToUpdate = playerMoveThresholdToUpdate * playerMoveThresholdToUpdate;
 
-    public LODInfo[] detailLevels;
 
     public MeshSettings meshSettings;
     public Transform player;
@@ -24,7 +23,7 @@ public class WaterGenerator : MonoBehaviour
 
     void Start()
     {        
-        float maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistanceThreshhold;
+        float maxViewDistance = 7200f;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / meshWorldSize);
         
@@ -65,7 +64,7 @@ public class WaterGenerator : MonoBehaviour
                     }
                     else
                     {
-                        WaterChunk newChunk = new WaterChunk(viewedChunkCoord, meshSettings, detailLevels, transform, player, waterMaterial);
+                        WaterChunk newChunk = new WaterChunk(viewedChunkCoord, meshSettings, transform, player, waterMaterial);
                         waterChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChange += OnWaterChunkVisibilityChanged;
                     }                    
