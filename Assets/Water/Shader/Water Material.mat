@@ -116,7 +116,7 @@ Material:
     - _EnvironmentReflections: 1
     - _FoamAmount: 15
     - _FoamCutoff: 1
-    - _FoamScale: 20
+    - _FoamScale: 50
     - _FoamSpeed: 0.2
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -145,7 +145,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DeepWater: {r: 0.06875, g: 0, b: 0.4, a: 0.7019608}
+    - _DeepWater: {r: 0.20511676, g: 0.11997399, b: 0.59599996, a: 0.7019608}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
     - _RefractionScale: {r: 1, g: 1, b: 0, a: 0}
