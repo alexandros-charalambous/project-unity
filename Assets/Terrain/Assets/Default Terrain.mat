@@ -102,7 +102,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Vector1_4C3F5EE4: 200
+    - Vector1_4C3F5EE4: 0
     - Vector1_5857EFB5: 220
     - Vector1_65D18AD4: 350
     - Vector1_6F228B9F: 210

@@ -8,24 +8,21 @@ public class HeightMapSettings : UpdatableData
 {    
     public NoiseSettings noiseSettings;
     
-    [Header("Map Variants")]
-    public bool useFalloff;
-    
     [Header("Mesh")]
-    public float heightMulyiplier;
+    public float heightMultyplier;
     public AnimationCurve heightCurve;
 
     public float minHeight 
     {
         get {
-            return heightMulyiplier * heightCurve.Evaluate(0);
+            return heightMultyplier * heightCurve.Evaluate(0);
         }
     }
     
     public float maxHeight 
     {
         get {
-            return heightMulyiplier * heightCurve.Evaluate(1);
+            return heightMultyplier * heightCurve.Evaluate(1);
         }
     }
     

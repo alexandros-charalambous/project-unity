@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class TerrainChunk
 {
     const float colliderGenerationDistanceThreshhold = 5f;
@@ -43,7 +44,7 @@ public class TerrainChunk
         sampleCenter = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
-
+        
         meshObject = new GameObject("Terrain Chunk");
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
@@ -66,9 +67,7 @@ public class TerrainChunk
             }
         }
 
-        maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistanceThreshhold;
-
-        
+        maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistanceThreshhold;     
     }
 
     public void Load()
@@ -199,11 +198,5 @@ class LODMesh
     {
         hasRequestedMesh = true;
         ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod), OnMeshDataReceived);
-    }    
-
-    public void RequestMesh(MeshSettings meshSettings)
-    {
-        hasRequestedMesh = true;
-        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(meshSettings, lod), OnMeshDataReceived);
-    }
+    } 
 }
