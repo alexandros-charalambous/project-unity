@@ -70,7 +70,7 @@ public class ThirdPersonMovement : MonoBehaviour
         float targetAngle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + camTransform.eulerAngles.y; //Angle relative to cam
         Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, .03f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, .07f);
 
         return moveDir.normalized;
     }
@@ -80,7 +80,7 @@ public class ThirdPersonMovement : MonoBehaviour
         //Change speed with Shift
         if (characterController.isGrounded)
         {
-            currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) && wallReflect == Vector3.zero && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 150f);
+            currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) && wallReflect == Vector3.zero && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 15f);
         }
         return currentSpeed;
     }
