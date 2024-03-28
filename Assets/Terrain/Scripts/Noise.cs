@@ -10,7 +10,7 @@ public class Noise : MonoBehaviour
     {
         float[,] noiseMap = new float[mapWidth,mapHeight];
 
-        System.Random prng = new System.Random(settings.seed);
+        System.Random prng = settings.seed.GenerateSeed();
         Vector2[] octaveOffsets = new Vector2[settings.octaves];
 
         float maxPossibleHeight = 0f;
@@ -35,7 +35,7 @@ public class Noise : MonoBehaviour
         float halfWidth = mapWidth / 2;
         float halfHeight = mapHeight / 2;
 
-        for (int y = 0; y< mapHeight; y++) {
+        for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++)
             {
                 amplitude = 1f;
@@ -81,11 +81,10 @@ public class Noise : MonoBehaviour
                 for (int x = 0; x < mapWidth; x++)
                 {
                 
-                    noiseMap [x,y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x,y]);
+                    noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x,y]);
                 }
             }
         }
-
         return noiseMap;
     }
 }
@@ -96,7 +95,7 @@ public class NoiseSettings
     public Noise.NormalizeMode normalizeMode;
 
     [Header("Seed")]
-    public int seed;
+    public Seed seed;
 
     [Header("Map Properties")]
     public float scale = 50f;

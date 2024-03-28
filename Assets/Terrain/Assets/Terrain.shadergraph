@@ -2794,7 +2794,7 @@
     "m_AlphaMode": 0,
     "m_RenderFace": 2,
     "m_AlphaClip": false,
-    "m_CastShadows": false,
+    "m_CastShadows": true,
     "m_ReceiveShadows": true,
     "m_AdditionalMotionVectorMode": 0,
     "m_AlembicMotionVectors": false,
@@ -3316,10 +3316,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 619.9999389648438,
-            "y": -456.99993896484377,
-            "width": 144.999755859375,
-            "height": 135.99993896484376
+            "x": 594.0,
+            "y": -485.0,
+            "width": 145.0,
+            "height": 136.0
         }
     },
     "m_Slots": [

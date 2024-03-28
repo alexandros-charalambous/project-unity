@@ -53,7 +53,7 @@ public class TerrainChunk
 
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
         meshObject.transform.parent = parent;
-        meshObject.layer = LayerMask.NameToLayer("Environment");
+        meshObject.layer = LayerMask.NameToLayer("Terrain");
         SetVisible(false);
 
         lodMeshes = new LODMesh[detailLevels.Length];
@@ -123,7 +123,7 @@ public class TerrainChunk
                     }
                     else if (!lodMesh.hasRequestedMesh)
                     {
-                        lodMesh.RequestMesh(heightMap, meshSettings);
+                        lodMesh.RequestMesh(heightMap, meshSettings);    
                     }
                 }                    
             }
@@ -179,6 +179,7 @@ class LODMesh
     public bool hasRequestedMesh;
     public bool hasMesh;
     int lod;
+
     public event System.Action updateCallback;
 
     public LODMesh(int lod)
