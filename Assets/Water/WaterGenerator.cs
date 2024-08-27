@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class WaterGenerator : MonoBehaviour
 {
-    const float playerMoveThresholdToUpdate = 25f;
-    const float sqrPlayerMoveThreshholdToUpdate = playerMoveThresholdToUpdate * playerMoveThresholdToUpdate;
-	
+	const float playerMoveThresholdToUpdate = 25f;
+	const float sqrPlayerMoveThreshholdToUpdate = playerMoveThresholdToUpdate * playerMoveThresholdToUpdate;
+
 	public const float maxViewDistance = 7200f;
 	public Transform player;
 
 	public static Vector2 playerPosition;
-    Vector2 playerPositionOld;
+	Vector2 playerPositionOld;
 
 	public Material material;
 	public Mesh mesh;
@@ -25,34 +25,34 @@ public class WaterGenerator : MonoBehaviour
 	{
 		chunkSize = 180;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDistance / chunkSize);
-        UpdateVisibleChunks();
+		UpdateVisibleChunks();
 	}
 
 	void Update()
 	{
-        playerPosition = new Vector2(player.position.x, player.position.z);
-		
-        // if (playerPosition != playerPositionOld)
-        // {
-        //     foreach(WaterChunk chunk in visibleWaterChunks)
-        //     {
-        //         chunk.UpdateCollisionMesh();
-        //     }
-        // }
+		playerPosition = new Vector2(player.position.x, player.position.z);
 
-		 if((playerPositionOld - playerPosition).sqrMagnitude > sqrPlayerMoveThreshholdToUpdate)
-        {   
-            playerPositionOld = playerPosition;
-            UpdateVisibleChunks();
-        }
+		// if (playerPosition != playerPositionOld)
+		// {
+		//     foreach(WaterChunk chunk in visibleWaterChunks)
+		//     {
+		//         chunk.UpdateCollisionMesh();
+		//     }
+		// }
+
+		if ((playerPositionOld - playerPosition).sqrMagnitude > sqrPlayerMoveThreshholdToUpdate)
+		{
+			playerPositionOld = playerPosition;
+			UpdateVisibleChunks();
+		}
 	}
 
 	void UpdateVisibleChunks()
 	{
-        HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
+		HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
 		for (int i = visibleWaterChunks.Count - 1; i >= 0; i--)
 		{
-            alreadyUpdatedChunkCoords.Add(visibleWaterChunks[i].coord);
+			alreadyUpdatedChunkCoords.Add(visibleWaterChunks[i].coord);
 			visibleWaterChunks[i].UpdateWaterChunk();
 		}
 
@@ -64,8 +64,8 @@ public class WaterGenerator : MonoBehaviour
 			for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
 			{
 				Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
-                if (!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
-                {
+				if (!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
+				{
 					if (waterChunkDictionary.ContainsKey(viewedChunkCoord))
 					{
 						waterChunkDictionary[viewedChunkCoord].UpdateWaterChunk();
@@ -82,15 +82,15 @@ public class WaterGenerator : MonoBehaviour
 		}
 	}
 
-    void OnWaterChunkVisibilityChanged(WaterChunk chunk, bool isVisible)
-    {
-        if (isVisible)
-        {
-            visibleWaterChunks.Add(chunk);
-        }
-        else
-        {
-            visibleWaterChunks.Remove(chunk);
-        }
-    }
+	void OnWaterChunkVisibilityChanged(WaterChunk chunk, bool isVisible)
+	{
+		if (isVisible)
+		{
+			visibleWaterChunks.Add(chunk);
+		}
+		else
+		{
+			visibleWaterChunks.Remove(chunk);
+		}
+	}
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThirdPersonMovement : MonoBehaviour
+public class PlayerMovementController : MonoBehaviour
 {
     public CharacterController characterController;
     public Transform camTransform;
@@ -10,19 +10,19 @@ public class ThirdPersonMovement : MonoBehaviour
     [Header("Movement Parameters")]
     [SerializeField] private float currentSpeed;
     private Vector3 velocity;
-    
+
     [Header("Jump Parameters")]
     [SerializeField] private float gravity;
-    [SerializeField] private float jumpHeight;    
-    [SerializeField] private float jumpVelocity;
+    [SerializeField] private float jumpHeight;
+    public float jumpVelocity;
     [SerializeField] private Vector3 onAirDirectionVelocity;
 
     [Header("Slide Parameters")]
     [SerializeField] private float groundAngle;
     [SerializeField] private Vector3 slideDirectionVelocity;
 
-    [Header("Wall Jump Parameters")]
-    [SerializeField] private Vector3 wallReflect;
+    // [Header("Wall Jump Parameters")]
+    // [SerializeField] private Vector3 wallReflect;
 
     void Start()
     {
@@ -32,7 +32,7 @@ public class ThirdPersonMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0 || wallReflect != Vector3.zero)
+        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0 /* || wallReflect != Vector3.zero*/ )
         {
             var forwardMovement = DirectionMovement();
             var directionMovement = new Vector3(forwardMovement.x, VerticalMovement().y, forwardMovement.z);
@@ -53,7 +53,7 @@ public class ThirdPersonMovement : MonoBehaviour
             //slide movement
             groundAngle > characterController.slopeLimit && direction.magnitude != 0f ? ForwardMovement(direction) * speed * .6f + slideDirectionVelocity
             //wall jump movement
-            : wallReflect != Vector3.zero ? ForwardMovement(direction) * speed * .3f + wallReflect * speed * 1.5f
+            // : wallReflect != Vector3.zero ? ForwardMovement(direction) * speed * .3f + wallReflect * speed * 1.5f
             //walk jump movement
             : onAirDirectionVelocity != Vector3.zero ? ForwardMovement(direction) * speed * .3f + onAirDirectionVelocity * speed * .7f
             //idle jump movement
@@ -80,7 +80,7 @@ public class ThirdPersonMovement : MonoBehaviour
         //Change speed with Shift
         if (characterController.isGrounded)
         {
-            currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) && wallReflect == Vector3.zero && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 15f);
+            currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) /* && wallReflect == Vector3.zero */ && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 12.5f);
         }
         return currentSpeed;
     }
@@ -111,7 +111,7 @@ public class ThirdPersonMovement : MonoBehaviour
                 }
                 else if (jumpVelocity < 0)
                 {
-                    jumpVelocity = -15f;
+                    jumpVelocity = -10f;
                 }
             }
         }
@@ -122,11 +122,13 @@ public class ThirdPersonMovement : MonoBehaviour
 
     public Vector3 SlideMovement(RaycastHit hit)
     {
-        float slideDirectionX = (1f - hit.normal.y) * hit.normal.x;
-        slideDirectionVelocity.x += slideDirectionX;
-
-        float slideDirectionZ = (1f - hit.normal.y) * hit.normal.z;
-        slideDirectionVelocity.z += slideDirectionZ;
+        if (Mathf.Abs(slideDirectionVelocity.x) < 17.5f && Mathf.Abs(slideDirectionVelocity.z) < 17.5f)
+        {
+            float slideDirectionX = (1f - hit.normal.y) * hit.normal.x;
+            float slideDirectionZ = (1f - hit.normal.y) * hit.normal.z;
+            slideDirectionVelocity.x += slideDirectionX;
+            slideDirectionVelocity.z += slideDirectionZ;
+        }
 
         return new Vector3(slideDirectionVelocity.x, velocity.y, slideDirectionVelocity.z);
     }
@@ -135,22 +137,22 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         velocity = groundAngle > characterController.slopeLimit ? velocity : Vector3.zero;
         onAirDirectionVelocity = Vector3.zero;
-        wallReflect = Vector3.zero;
-        if (hit.normal.y < .1f && !characterController.isGrounded && Input.GetButtonDown("Jump"))
-        {
-            Vector3 playerAngle = Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
-            if (CanPlayerWallJump(hit))
-            {
-                wallReflect = Vector3.Reflect(playerAngle, hit.normal);
-                jumpVelocity = Mathf.Sqrt(jumpHeight * -4f * gravity);
-            }
-        }
+        // wallReflect = Vector3.zero;
+        // if (hit.normal.y < .1f && !characterController.isGrounded && Input.GetButtonDown("Jump"))
+        // {
+        //     Vector3 playerAngle = Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
+        //     // if (CanPlayerWallJump(hit))
+        //     // {
+        //     //     // wallReflect = Vector3.Reflect(playerAngle, hit.normal);
+        //     //     jumpVelocity = Mathf.Sqrt(jumpHeight * -4f * gravity);
+        //     // }
+        // }
     }
 
-    private bool CanPlayerWallJump(ControllerColliderHit hit)
-    {
-        Vector3 dif = hit.normal + Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
-        print(dif);
-        return dif.x < -1f || dif.x > 1f || dif.z < -1f || dif.z > 1f ? false : true;
-    }
+    // private bool CanPlayerWallJump(ControllerColliderHit hit)
+    // {
+    //     Vector3 dif = hit.normal + Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
+    //     print(dif);
+    //     return dif.x < -1f || dif.x > 1f || dif.z < -1f || dif.z > 1f ? false : true;
+    // }
 }

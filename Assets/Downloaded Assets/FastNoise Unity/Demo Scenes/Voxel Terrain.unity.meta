@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dd196adfa216da84f8283972ce795f4e
+timeCreated: 1471957718
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Demo Scenes/Voxel Terrain.unity
+  uploadId: 217279

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.TextCore.Text;
 
 [System.Serializable]
-[CreateAssetMenu(fileName ="Lighting Preset", menuName ="Scriptables/Lighting Preset",order =1)]
+[CreateAssetMenu(fileName = "Lighting Preset", menuName = "Scriptables/Lighting Preset", order = 1)]
 public class LightingPreset : ScriptableObject
 {
     [Header("Light Presets")]
@@ -11,7 +11,7 @@ public class LightingPreset : ScriptableObject
     public Gradient DirectionalColor;
     public Gradient FogColor;
 
-    
+
     [Header("Sky Presets")]
     public Gradient TopColor;
     public Gradient HorizonColor;

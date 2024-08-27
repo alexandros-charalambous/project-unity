@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: bb95a727f9473aa4d8733be0fb0ea5f2
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Voxel Engine/Visual/Vertex Colored.shader
+  uploadId: 217279

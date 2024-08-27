@@ -18,11 +18,11 @@ MonoBehaviour:
     seed:
       seed: 14
     scale: 1800
-    octaves: 7
+    octaves: 11
     persistance: 0.5
     lacunarity: 2
     offset: {x: 0, y: 0}
-  heightMultyplier: 600
+  heightMultyplier: 700
   heightCurve:
     serializedVersion: 2
     m_Curve:

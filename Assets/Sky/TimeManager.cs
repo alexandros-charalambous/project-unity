@@ -14,10 +14,10 @@ public class LightingManager : MonoBehaviour
     public int hours;
     public int minutes;
     public bool pauseTimer;
-    
+
     [Header("Light Intensity")]
-    [SerializeField] [Range(0,1)] private float dayIntensity;
-    [SerializeField] [Range(0,1)] private float nightIntensity;
+    [SerializeField][Range(0, 1)] private float dayIntensity;
+    [SerializeField][Range(0, 1)] private float nightIntensity;
 
     private void Update()
     {
@@ -40,19 +40,20 @@ public class LightingManager : MonoBehaviour
     }
 
 
-    private void UpdateLighting(float timePercent)  
+    private void UpdateLighting(float timePercent)
     {
         //Set ambient and fog
         RenderSettings.ambientLight = GradientPreset.AmbientColor.Evaluate(timePercent);
-        RenderSettings.fogColor = GradientPreset.FogColor.Evaluate(timePercent);        
+        RenderSettings.fogColor = GradientPreset.FogColor.Evaluate(timePercent);
 
         //If the directional light is set then rotate and set it's color
         if (DayDirectionalLight != null && NightDirectionalLight != null)
         {
             DayDirectionalLight.color = GradientPreset.DirectionalColor.Evaluate(timePercent);
-            DayDirectionalLight.transform.localRotation = Quaternion.Euler(new Vector3((timePercent * 360f) - 90f, 170f, 0));
-            NightDirectionalLight.color = GradientPreset.DirectionalColor.Evaluate(timePercent);
-            NightDirectionalLight.transform.localRotation = Quaternion.Euler(new Vector3((timePercent * 360f) + 90f, 170f, 0));
+            DayDirectionalLight.transform.localRotation = Quaternion.Euler(new Vector3((timePercent * 360f) - 90f, 180f, 0));
+
+            // NightDirectionalLight.color = GradientPreset.DirectionalColor.Evaluate(timePercent);
+            NightDirectionalLight.transform.localRotation = Quaternion.Euler(new Vector3((timePercent * 360f) + 70f, 180f, 0));
 
         }
     }
@@ -67,12 +68,16 @@ public class LightingManager : MonoBehaviour
             if (DayDirectionalLight.intensity < dayIntensity)
             {
                 DayDirectionalLight.intensity += Time.deltaTime / 2f;
-            } else {
+            }
+            else
+            {
                 DayDirectionalLight.intensity = dayIntensity;
             }
-        } else {
+        }
+        else
+        {
             if (DayDirectionalLight.intensity > 0)
-            {                    
+            {
                 DayDirectionalLight.intensity -= Time.deltaTime / 2f;
             }
             else
@@ -88,12 +93,16 @@ public class LightingManager : MonoBehaviour
             if (NightDirectionalLight.intensity < nightIntensity)
             {
                 NightDirectionalLight.intensity += Time.deltaTime / 2f;
-            } else {
+            }
+            else
+            {
                 NightDirectionalLight.intensity = nightIntensity;
             }
-        } else {
+        }
+        else
+        {
             if (NightDirectionalLight.intensity > 0)
-            {                    
+            {
                 NightDirectionalLight.intensity -= Time.deltaTime / 2f;
             }
             else
@@ -132,7 +141,7 @@ public class LightingManager : MonoBehaviour
             foreach (Light light in lights)
             {
                 if (light.type == LightType.Directional)
-                {                    
+                {
                     DayDirectionalLight = RenderSettings.sun;
                     return;
                 }

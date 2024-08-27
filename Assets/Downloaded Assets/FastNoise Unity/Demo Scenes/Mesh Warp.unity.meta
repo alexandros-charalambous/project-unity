@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7b118c6a7f126f44993b265e18efde6f
+timeCreated: 1472925036
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Demo Scenes/Mesh Warp.unity
+  uploadId: 217279

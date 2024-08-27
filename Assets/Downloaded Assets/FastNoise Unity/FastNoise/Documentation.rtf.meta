@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9085ec9b1422a1c43ae16f0a74f1efab
+timeCreated: 1476744034
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/FastNoise/Documentation.rtf
+  uploadId: 217279

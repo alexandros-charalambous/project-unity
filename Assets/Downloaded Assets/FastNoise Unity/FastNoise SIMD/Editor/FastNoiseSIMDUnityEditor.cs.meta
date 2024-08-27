@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 70ce904de87ea064392eb8c7a9201425
+timeCreated: 1472645915
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/FastNoise SIMD/Editor/FastNoiseSIMDUnityEditor.cs
+  uploadId: 217279

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 18257190b46054b4685ea153b1661585
+timeCreated: 1472149625
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Voxel Engine/TerrainGenerators/TerrainGenerator_GrassLand.cs
+  uploadId: 217279

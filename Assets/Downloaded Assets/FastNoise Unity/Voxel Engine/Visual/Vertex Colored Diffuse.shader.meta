@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 4aa72e15bdeab4f4d82bb16572d0615e
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Voxel Engine/Visual/Vertex Colored Diffuse.shader
+  uploadId: 217279

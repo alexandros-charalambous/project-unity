@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 8c38cf5ff55df7a4a95a9aa6a8d7a324
+timeCreated: 1472151849
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 70706
+  packageName: FastNoise
+  packageVersion: 1.5
+  assetPath: Assets/FastNoise Unity/Voxel Engine/TerrainGeneratorBase.cs
+  uploadId: 217279
