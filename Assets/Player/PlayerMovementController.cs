@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class PlayerMovementController : MonoBehaviour
@@ -20,9 +19,8 @@ public class PlayerMovementController : MonoBehaviour
     [Header("Slide Parameters")]
     [SerializeField] private float groundAngle;
     [SerializeField] private Vector3 slideDirectionVelocity;
+    public Boolean isSliding;
 
-    // [Header("Wall Jump Parameters")]
-    // [SerializeField] private Vector3 wallReflect;
 
     void Start()
     {
@@ -32,7 +30,7 @@ public class PlayerMovementController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0 /* || wallReflect != Vector3.zero*/ )
+        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
         {
             var forwardMovement = DirectionMovement();
             var directionMovement = new Vector3(forwardMovement.x, VerticalMovement().y, forwardMovement.z);
@@ -52,8 +50,6 @@ public class PlayerMovementController : MonoBehaviour
         velocity =
             //slide movement
             groundAngle > characterController.slopeLimit && direction.magnitude != 0f ? ForwardMovement(direction) * speed * .6f + slideDirectionVelocity
-            //wall jump movement
-            // : wallReflect != Vector3.zero ? ForwardMovement(direction) * speed * .3f + wallReflect * speed * 1.5f
             //walk jump movement
             : onAirDirectionVelocity != Vector3.zero ? ForwardMovement(direction) * speed * .3f + onAirDirectionVelocity * speed * .7f
             //idle jump movement
@@ -69,19 +65,32 @@ public class PlayerMovementController : MonoBehaviour
     {
         float targetAngle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + camTransform.eulerAngles.y; //Angle relative to cam
         Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-        Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, .07f);
+        if (!isSliding)
+        {
+            Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, .07f);
+        }
 
         return moveDir.normalized;
     }
 
     private float GetSpeed(Vector3 direction)
     {
-        //Change speed with Shift
+        //Change speed
         if (characterController.isGrounded)
         {
-            currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) /* && wallReflect == Vector3.zero */ && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 12.5f);
+            //Crouch Movement
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                currentSpeed = Mathf.Clamp(currentSpeed -= currentSpeed * 4f * Time.deltaTime, 4f, 12.5f);
+            }
+            //Run Movement
+            else
+            {
+                currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 12.5f);
+            }
         }
+
         return currentSpeed;
     }
 
@@ -96,13 +105,16 @@ public class PlayerMovementController : MonoBehaviour
             if (sphereCast && groundAngle > characterController.slopeLimit)
             {
                 velocity = SlideMovement(hit);
+                isSliding = true;
                 if (Input.GetButtonDown("Jump"))
                 {
                     jumpVelocity = Mathf.Sqrt(jumpHeight * -1.5f * gravity);
+                    isSliding = false;
                 }
             }
             else
             {
+                isSliding = false;
                 slideDirectionVelocity = Vector3.zero;
                 if (Input.GetButtonDown("Jump"))
                 {
@@ -111,7 +123,7 @@ public class PlayerMovementController : MonoBehaviour
                 }
                 else if (jumpVelocity < 0)
                 {
-                    jumpVelocity = -10f;
+                    jumpVelocity = -9.80665f;
                 }
             }
         }
@@ -128,6 +140,7 @@ public class PlayerMovementController : MonoBehaviour
             float slideDirectionZ = (1f - hit.normal.y) * hit.normal.z;
             slideDirectionVelocity.x += slideDirectionX;
             slideDirectionVelocity.z += slideDirectionZ;
+            transform.rotation = Quaternion.Euler(slideDirectionVelocity);
         }
 
         return new Vector3(slideDirectionVelocity.x, velocity.y, slideDirectionVelocity.z);
@@ -137,22 +150,5 @@ public class PlayerMovementController : MonoBehaviour
     {
         velocity = groundAngle > characterController.slopeLimit ? velocity : Vector3.zero;
         onAirDirectionVelocity = Vector3.zero;
-        // wallReflect = Vector3.zero;
-        // if (hit.normal.y < .1f && !characterController.isGrounded && Input.GetButtonDown("Jump"))
-        // {
-        //     Vector3 playerAngle = Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
-        //     // if (CanPlayerWallJump(hit))
-        //     // {
-        //     //     // wallReflect = Vector3.Reflect(playerAngle, hit.normal);
-        //     //     jumpVelocity = Mathf.Sqrt(jumpHeight * -4f * gravity);
-        //     // }
-        // }
     }
-
-    // private bool CanPlayerWallJump(ControllerColliderHit hit)
-    // {
-    //     Vector3 dif = hit.normal + Quaternion.Euler(0f, characterController.transform.eulerAngles.y, 0f) * Vector3.forward;
-    //     print(dif);
-    //     return dif.x < -1f || dif.x > 1f || dif.z < -1f || dif.z > 1f ? false : true;
-    // }
 }

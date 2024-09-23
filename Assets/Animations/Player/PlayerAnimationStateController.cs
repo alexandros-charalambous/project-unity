@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class AnimationStateController : MonoBehaviour
@@ -11,6 +10,8 @@ public class AnimationStateController : MonoBehaviour
     int isRunningHash;
     int isJumpingHash;
     int isGroundedHash;
+    int isSlidingHash;
+    int isCrouchingHash;
 
     void Start()
     {
@@ -21,6 +22,8 @@ public class AnimationStateController : MonoBehaviour
         isRunningHash = Animator.StringToHash("isRunning");
         isJumpingHash = Animator.StringToHash("isJumping");
         isGroundedHash = Animator.StringToHash("isGrounded");
+        isSlidingHash = Animator.StringToHash("isSliding");
+        isCrouchingHash = Animator.StringToHash("isCrouching");
     }
 
     // Update is called once per frame
@@ -30,9 +33,29 @@ public class AnimationStateController : MonoBehaviour
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
         bool isJumping = Input.GetKeyDown(KeyCode.Space);
         bool isGrounded = playerMovementController.characterController.isGrounded;
+        bool isSliding = playerMovementController.isSliding;
+        bool isCrouching = Input.GetKey(KeyCode.LeftControl);
 
 
         animator.SetBool(isGroundedHash, isGrounded);
+
+        if (isSliding)
+        {
+            animator.SetBool(isSlidingHash, true);
+        }
+        else
+        {
+            animator.SetBool(isSlidingHash, false);
+        }
+
+        if (isCrouching)
+        {
+            animator.SetBool(isCrouchingHash, true);
+        }
+        else
+        {
+            animator.SetBool(isCrouchingHash, false);
+        }
 
         if (isJumping)
         {
