@@ -2,7 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [ExecuteAlways]
-public class LightingManager : MonoBehaviour
+public class TimeManager : MonoBehaviour
 {
     [Header("Lights")]
     [SerializeField] private Light DayDirectionalLight;

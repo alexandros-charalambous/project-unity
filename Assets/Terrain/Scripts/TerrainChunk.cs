@@ -30,14 +30,14 @@ public class TerrainChunk
 
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
-    BiomeSettings biome; // Added for biome-specific settings
+    BiomeBlendData biomeBlendData;
     Transform player;
 
-    public TerrainChunk(Vector2 coord, BiomeSettings biome, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform player, Material material)
+    public TerrainChunk(Vector2 coord, BiomeBlendData biomeBlendData, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform player, Material material)
     {
         this.coord = coord;
-        this.biome = biome;
-        this.heightMapSettings = biome.heightMapSettings;
+        this.biomeBlendData = biomeBlendData;
+        this.heightMapSettings = biomeBlendData.primaryBiome.heightMapSettings;
         this.meshSettings = meshSettings;
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
@@ -74,7 +74,15 @@ public class TerrainChunk
 
     public void Load()
     {
-        ThreadedDataRequester.RequestData(() => HeightMapGenerator.GenerateHeightMap(meshSettings.numberVerticesPerLine, meshSettings.numberVerticesPerLine, heightMapSettings, sampleCenter), OnHeightMapReceived);
+        ThreadedDataRequester.RequestData(() => 
+            HeightMapGenerator.GenerateHeightMap(
+                meshSettings.numberVerticesPerLine, 
+                meshSettings.numberVerticesPerLine, 
+                biomeBlendData.primaryBiome.heightMapSettings, 
+                biomeBlendData.secondaryBiome != null ? biomeBlendData.secondaryBiome.heightMapSettings : null,
+                biomeBlendData.blendFactor,
+                sampleCenter), 
+            OnHeightMapReceived);
     }
 
     void OnHeightMapReceived(object heightMapObject)
@@ -87,7 +95,7 @@ public class TerrainChunk
     
     public void SpawnObjects()
     {
-        if (biome.treePrefabs == null || biome.treePrefabs.Length == 0) return;
+        if (biomeBlendData.primaryBiome.treePrefabs == null || biomeBlendData.primaryBiome.treePrefabs.Length == 0) return;
 
         // Use a seed based on chunk coordinates and world seed for deterministic spawning
         int seed = (coord.GetHashCode() + heightMapSettings.noiseSettings.seed.GetHashCode());
@@ -96,7 +104,7 @@ public class TerrainChunk
         int numVerticesPerLine = meshSettings.numberVerticesPerLine;
         float meshWorldSize = meshSettings.meshWorldSize;
 
-        for (int i = 0; i < (biome.treeDensity * 100); i++) // Simplified density
+        for (int i = 0; i < (biomeBlendData.primaryBiome.treeDensity * 100); i++) // Simplified density
         {
             // Get a random point within the chunk
             int x = rng.Next(0, numVerticesPerLine);
@@ -112,7 +120,7 @@ public class TerrainChunk
             // Simple check to avoid spawning trees underwater (assuming water is at y=0)
             if (worldPosition.y > 0)
             {
-                GameObject treePrefab = biome.treePrefabs[rng.Next(0, biome.treePrefabs.Length)];
+                GameObject treePrefab = biomeBlendData.primaryBiome.treePrefabs[rng.Next(0, biomeBlendData.primaryBiome.treePrefabs.Length)];
                 GameObject.Instantiate(treePrefab, worldPosition, Quaternion.identity, meshObject.transform);
             }
         }

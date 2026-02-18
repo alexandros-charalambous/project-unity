@@ -4,32 +4,49 @@ using UnityEngine;
 
 public static class HeightMapGenerator
 {
-    public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCenter)   
+    public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings1, HeightMapSettings settings2, float blendFactor, Vector2 sampleCenter)   
     {
-        float [,] values = Noise.GenerateNoiseMap(width, height, settings.noiseSettings, sampleCenter);
-        
-        AnimationCurve heightCurve = new AnimationCurve(settings.heightCurve.keys);
+        float[,] values1 = Noise.GenerateNoiseMap(width, height, settings1.noiseSettings, sampleCenter);
+        float[,] values2 = (settings2 != null) ? Noise.GenerateNoiseMap(width, height, settings2.noiseSettings, sampleCenter) : null;
 
-        float minVlaue = float.MaxValue;
+        float[,] finalValues = new float[width, height];
+
+        AnimationCurve heightCurve1 = new AnimationCurve(settings1.heightCurve.keys);
+        AnimationCurve heightCurve2 = (settings2 != null) ? new AnimationCurve(settings2.heightCurve.keys) : null;
+
+        float minValue = float.MaxValue;
         float maxValue = float.MinValue;
 
         for (int i = 0; i < width; i++)
         {
-            for (int j = 0; j < width; j++)
+            for (int j = 0; j < height; j++)
             {
-                values[i,j] *= heightCurve.Evaluate(values[i,j]) * settings.heightMultyplier;
+                float height1 = values1[i, j] * heightCurve1.Evaluate(values1[i, j]) * settings1.heightMultyplier;
+                float finalHeight;
 
-                if (values[i,j] > maxValue)
+                if (settings2 != null)
                 {
-                    maxValue = values[i,j];
+                    float height2 = values2[i, j] * heightCurve2.Evaluate(values2[i, j]) * settings2.heightMultyplier;
+                    finalHeight = Mathf.Lerp(height1, height2, blendFactor);
                 }
-                if (values[i,j] < minVlaue)
+                else
                 {
-                    minVlaue = values[i,j];
+                    finalHeight = height1;
+                }
+
+                finalValues[i, j] = finalHeight;
+
+                if (finalHeight > maxValue)
+                {
+                    maxValue = finalHeight;
+                }
+                if (finalHeight < minValue)
+                {
+                    minValue = finalHeight;
                 }
             }
         }
-        return new HeightMap(values, minVlaue, maxValue);
+        return new HeightMap(finalValues, minValue, maxValue);
     }
 }
 

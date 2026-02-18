@@ -15,7 +15,11 @@ public class TerrainGenerator : MonoBehaviour
     public Transform player;
     public Material mapMaterial;
 
-    public BiomeManager biomeManager; // Added for biome integration
+    public BiomeManager biomeManager;
+    public BiomeNotificator biomeNotificator;
+
+    private BiomeSettings currentBiome;
+    private HashSet<string> discoveredBiomes = new HashSet<string>();
 
     Vector2 playerPosition;
     Vector2 playerPositionOld;
@@ -55,6 +59,29 @@ public class TerrainGenerator : MonoBehaviour
         {   
             playerPositionOld = playerPosition;
             UpdateVisibleChunks();
+            CheckForNewBiome();
+        }
+    }
+
+    void CheckForNewBiome()
+    {
+        int currentChunkCoordX = Mathf.RoundToInt(playerPosition.x / meshWorldSize);
+        int currentChunkCoordY = Mathf.RoundToInt(playerPosition.y / meshWorldSize);
+        Vector2 currentChunkCoord = new Vector2(currentChunkCoordX, currentChunkCoordY);
+
+        BiomeSettings newBiome = biomeManager.GetBiomeForChunk(currentChunkCoord, meshWorldSize);
+
+        if (newBiome != null && newBiome != currentBiome)
+        {
+            currentBiome = newBiome;
+            if (!discoveredBiomes.Contains(currentBiome.biomeName))
+            {
+                discoveredBiomes.Add(currentBiome.biomeName);
+                if (biomeNotificator != null)
+                {
+                    biomeNotificator.ShowNotification(currentBiome.biomeName);
+                }
+            }
         }
     }
 
@@ -81,10 +108,10 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        BiomeSettings biome = biomeManager.GetBiomeForChunk(viewedChunkCoord, meshWorldSize);
-                        if (biome != null)
+                        BiomeBlendData biomeBlendData = biomeManager.GetBiomeBlendData(viewedChunkCoord, meshWorldSize);
+                        if (biomeBlendData.primaryBiome != null)
                         {
-                            TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, biome, meshSettings, detailLevels, colliderLODIndex, transform, player, mapMaterial);
+                            TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, biomeBlendData, meshSettings, detailLevels, colliderLODIndex, transform, player, mapMaterial);
                             terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                             newChunk.onVisibilityChange += OnTerrainChunkVisibilityChanged;
                             newChunk.Load();
