@@ -8,41 +8,84 @@ public class ThreadedDataRequester : MonoBehaviour
 {
     static ThreadedDataRequester instance;
     Queue<ThreadInfo> dataQueue = new Queue<ThreadInfo>();
+    Queue<Action> workQueue = new Queue<Action>();
+    private bool isRunning = true;
+    private List<Thread> threadPool = new List<Thread>();
+    private readonly object workQueueLock = new object();
+    private readonly object dataQueueLock = new object();
 
     void Awake()
     {
-        instance = FindFirstObjectByType<ThreadedDataRequester>();
+        instance = this;
+        int threadCount = System.Environment.ProcessorCount;
+        for (int i = 0; i < threadCount; i++)
+        {
+            Thread thread = new Thread(Worker);
+            thread.Start();
+            threadPool.Add(thread);
+        }
     }
 
-    //HeightMap threads
     public static void RequestData(Func<object> generateData, Action<object> callback)
     {
-        ThreadStart threadStart = delegate {
-            instance.DataThread(generateData, callback);
+        Action work = () => {
+            object data = generateData();
+            lock (instance.dataQueueLock)
+            {
+                instance.dataQueue.Enqueue(new ThreadInfo(callback, data));
+            }
         };
 
-        new Thread(threadStart).Start();
+        lock (instance.workQueueLock)
+        {
+            instance.workQueue.Enqueue(work);
+        }
     }
     
-    void DataThread(Func<object> generateData, Action<object> callback)
+    private void Worker()
     {
-        object data = generateData();
-        lock (dataQueue) {
-            dataQueue.Enqueue(new ThreadInfo(callback, data));
+        while (isRunning)
+        {
+            Action work = null;
+            lock (workQueueLock)
+            {
+                if (workQueue.Count > 0)
+                {
+                    work = workQueue.Dequeue();
+                }
+            }
+
+            if (work != null)
+            {
+                work();
+            }
+            else
+            {
+                Thread.Sleep(1); // Sleep to prevent busy waiting
+            }
         }
     }
 
     void Update()
     {
-        if (dataQueue.Count > 0)
+        lock (dataQueueLock)
         {
-            for (int i = 0; i < dataQueue.Count; i++)
+            while (dataQueue.Count > 0)
             {
                 ThreadInfo threadInfo = dataQueue.Dequeue();
                 threadInfo.callback(threadInfo.parameter);
             }
         }
-    }    
+    }
+
+    void OnDestroy()
+    {
+        isRunning = false;
+        foreach(var thread in threadPool)
+        {
+            thread.Join();
+        }
+    }
 
     struct ThreadInfo 
     {

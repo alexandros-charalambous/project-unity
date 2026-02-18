@@ -20,9 +20,6 @@ public class Noise : MonoBehaviour
         {
             float offsetX = prng.Next(-100000, 100000) + settings.offset.x + sampleCenter.x;
             float offsetY = prng.Next(-100000, 100000) - settings.offset.y - sampleCenter.y;
-            // float offsetX = prng.Next(-100000, 100000) + (settings.offset.x + sampleCenter.x) / settings.scale; 
-            // float offsetY = prng.Next(-100000, 100000) - (settings.offset.y - sampleCenter.y) / settings.scale;  
-
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
 
             maxPossibleHeight += amplitude;
@@ -32,8 +29,8 @@ public class Noise : MonoBehaviour
         float maxLocalNoiseHeight = float.MinValue;
         float minLocalNoiseHeight = float.MaxValue;
 
-        float halfWidth = mapWidth / 2;
-        float halfHeight = mapHeight / 2;
+        float halfWidth = mapWidth / 2f;
+        float halfHeight = mapHeight / 2f;
 
         for (int y = 0; y < mapHeight; y++)
         {
@@ -46,9 +43,7 @@ public class Noise : MonoBehaviour
                 {
                     float sampleX = (x - halfWidth + octaveOffsets[i].x) / settings.scale * frequency;
                     float sampleY = (y - halfHeight + octaveOffsets[i].y) / settings.scale * frequency;
-                    // float sampleX = (x - halfWidth) / settings.scale * frequency + octaveOffsets[i].x * frequency;
-                    // float sampleY = (y - halfHeight) / settings.scale * frequency - octaveOffsets[i].y * frequency;
-
+                    
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
                     noiseHeight += perlinValue * amplitude;
 
@@ -67,26 +62,33 @@ public class Noise : MonoBehaviour
                 }
 
                 noiseMap[x, y] = noiseHeight;
-
-                if (settings.normalizeMode == NormalizeMode.Global)
-                {
-                    float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / .9f);
-                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
-                }
             }
         }
 
+        // Normalize the noise map
         if (settings.normalizeMode == NormalizeMode.Local)
         {
             for (int y = 0; y < mapHeight; y++)
             {
                 for (int x = 0; x < mapWidth; x++)
                 {
-
                     noiseMap[x, y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x, y]);
                 }
             }
         }
+        else // NormalizeMode.Global
+        {
+            float globalNormalizer = 1f / (maxPossibleHeight / 0.9f);
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    float normalizedHeight = (noiseMap[x, y] + 1) * globalNormalizer;
+                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
+                }
+            }
+        }
+
         return noiseMap;
     }
 }

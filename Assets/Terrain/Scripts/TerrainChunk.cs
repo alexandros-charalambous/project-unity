@@ -22,7 +22,7 @@ public class TerrainChunk
     LODMesh[] lodMeshes;
     int colliderLODIndex;
 
-    HeightMap heightMap;
+    public HeightMap heightMap;
     bool heightMapReceived;
     int previousLODIndex = -1;
     bool hasSetCollider;
@@ -30,15 +30,17 @@ public class TerrainChunk
 
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
+    BiomeSettings biome; // Added for biome-specific settings
     Transform player;
 
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform player, Material material)
+    public TerrainChunk(Vector2 coord, BiomeSettings biome, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform player, Material material)
     {
         this.coord = coord;
+        this.biome = biome;
+        this.heightMapSettings = biome.heightMapSettings;
+        this.meshSettings = meshSettings;
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
-        this.heightMapSettings = heightMapSettings;
-        this.meshSettings = meshSettings;
         this.player = player;
 
         sampleCenter = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
@@ -59,7 +61,7 @@ public class TerrainChunk
         lodMeshes = new LODMesh[detailLevels.Length];
         for (int i = 0; i < detailLevels.Length; i++)
         {
-            lodMeshes[i] = new LODMesh(detailLevels[i].lod);
+            lodMeshes[i] = new LODMesh(this, detailLevels[i].lod);
             lodMeshes[i].updateCallback += UpdateTerrainChunk;
             if (i == colliderLODIndex)
             {
@@ -81,6 +83,39 @@ public class TerrainChunk
         heightMapReceived = true;
 
         UpdateTerrainChunk();
+    }
+    
+    public void SpawnObjects()
+    {
+        if (biome.treePrefabs == null || biome.treePrefabs.Length == 0) return;
+
+        // Use a seed based on chunk coordinates and world seed for deterministic spawning
+        int seed = (coord.GetHashCode() + heightMapSettings.noiseSettings.seed.GetHashCode());
+        System.Random rng = new System.Random(seed);
+
+        int numVerticesPerLine = meshSettings.numberVerticesPerLine;
+        float meshWorldSize = meshSettings.meshWorldSize;
+
+        for (int i = 0; i < (biome.treeDensity * 100); i++) // Simplified density
+        {
+            // Get a random point within the chunk
+            int x = rng.Next(0, numVerticesPerLine);
+            int y = rng.Next(0, numVerticesPerLine);
+            
+            float height = heightMap.values[x, y];
+
+            // Convert vertex coordinates to a world position
+            Vector2 percent = new Vector2((x - 1f) / (numVerticesPerLine - 3f), (y - 1f) / (numVerticesPerLine - 3f));
+            Vector2 positionOnChunk = (new Vector2(percent.x, -percent.y) - new Vector2(0.5f, -0.5f)) * meshWorldSize;
+            Vector3 worldPosition = new Vector3(positionOnChunk.x + coord.x * meshWorldSize, height, positionOnChunk.y + coord.y * meshWorldSize);
+
+            // Simple check to avoid spawning trees underwater (assuming water is at y=0)
+            if (worldPosition.y > 0)
+            {
+                GameObject treePrefab = biome.treePrefabs[rng.Next(0, biome.treePrefabs.Length)];
+                GameObject.Instantiate(treePrefab, worldPosition, Quaternion.identity, meshObject.transform);
+            }
+        }
     }
 
     Vector2 playerPosition
@@ -179,11 +214,13 @@ class LODMesh
     public bool hasRequestedMesh;
     public bool hasMesh;
     int lod;
+    TerrainChunk parent; // Reference to parent chunk
 
     public event System.Action updateCallback;
 
-    public LODMesh(int lod)
+    public LODMesh(TerrainChunk parent, int lod)
     {
+        this.parent = parent;
         this.lod = lod;
     }
 
@@ -191,6 +228,11 @@ class LODMesh
     {
         mesh = ((MeshData)meshDataObject).CreateMesh();
         hasMesh = true;
+
+        if (lod == 0) // Only spawn objects on highest LOD
+        {
+            parent.SpawnObjects();
+        }
 
         updateCallback();
     }

@@ -15,6 +15,8 @@ public class TerrainGenerator : MonoBehaviour
     public Transform player;
     public Material mapMaterial;
 
+    public BiomeManager biomeManager; // Added for biome integration
+
     Vector2 playerPosition;
     Vector2 playerPositionOld;
 
@@ -25,7 +27,11 @@ public class TerrainGenerator : MonoBehaviour
     List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
 
     void Start()
-    {        
+    {
+        if (biomeManager == null) {
+            biomeManager = FindObjectOfType<BiomeManager>();
+        }
+
         float maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistanceThreshhold;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / meshWorldSize);
@@ -75,10 +81,14 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, player, mapMaterial);
-                        terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
-                        newChunk.onVisibilityChange += OnTerrainChunkVisibilityChanged;
-                        newChunk.Load();
+                        BiomeSettings biome = biomeManager.GetBiomeForChunk(viewedChunkCoord, meshWorldSize);
+                        if (biome != null)
+                        {
+                            TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, biome, meshSettings, detailLevels, colliderLODIndex, transform, player, mapMaterial);
+                            terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
+                            newChunk.onVisibilityChange += OnTerrainChunkVisibilityChanged;
+                            newChunk.Load();
+                        }
                     }                    
                 }
             }
