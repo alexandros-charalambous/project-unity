@@ -12,6 +12,7 @@ public class AnimationStateController : MonoBehaviour
     int isGroundedHash;
     int isSlidingHash;
     int isCrouchingHash;
+    int isRollingHash;
 
     void Start()
     {
@@ -24,6 +25,7 @@ public class AnimationStateController : MonoBehaviour
         isGroundedHash = Animator.StringToHash("isGrounded");
         isSlidingHash = Animator.StringToHash("isSliding");
         isCrouchingHash = Animator.StringToHash("isCrouching");
+        isRollingHash = Animator.StringToHash("isRolling");
     }
 
     // Update is called once per frame
@@ -34,10 +36,30 @@ public class AnimationStateController : MonoBehaviour
         bool isJumping = Input.GetKeyDown(KeyCode.Space);
         bool isGrounded = playerMovementController.characterController.isGrounded;
         bool isSliding = playerMovementController.isSliding;
-        bool isCrouching = Input.GetKey(KeyCode.LeftControl);
+        bool isCrouching = Input.GetKey(KeyCode.C);
+        bool isRolling = playerMovementController.rollAnimation;
+        bool isWalkingUphill = playerMovementController.isWalkingUphill;
 
 
         animator.SetBool(isGroundedHash, isGrounded);
+
+        if (isRolling)
+        {
+            animator.SetBool(isRollingHash, true);
+        }
+        else
+        {
+            animator.SetBool(isRollingHash, false);
+        }
+
+        if (isJumping)
+        {
+            animator.SetBool(isJumpingHash, true);
+        }
+        else
+        {
+            animator.SetBool(isJumpingHash, false);
+        }
 
         if (isSliding)
         {
@@ -57,25 +79,21 @@ public class AnimationStateController : MonoBehaviour
             animator.SetBool(isCrouchingHash, false);
         }
 
-        if (isJumping)
-        {
-            animator.SetBool(isJumpingHash, true);
-        }
-        else
-        {
-            animator.SetBool(isJumpingHash, false);
-        }
-
         if (isWalking)
         {
             animator.SetBool(isWalkingHash, true);
+            if (isWalkingUphill)
+            {
+                animator.speed = .5f;
+            }
         }
         else
         {
             animator.SetBool(isWalkingHash, false);
+            animator.speed = 1f;
         }
 
-        if (isWalking && isRunning)
+        if (isWalking && isRunning && !isWalkingUphill)
         {
             animator.SetBool(isRunningHash, true);
         }

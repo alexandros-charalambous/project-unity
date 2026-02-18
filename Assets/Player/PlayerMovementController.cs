@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerMovementController : MonoBehaviour
@@ -8,7 +9,8 @@ public class PlayerMovementController : MonoBehaviour
 
     [Header("Movement Parameters")]
     [SerializeField] private float currentSpeed;
-    private Vector3 velocity;
+    [SerializeField] private Vector3 velocity;
+    public bool isWalkingUphill;
 
     [Header("Jump Parameters")]
     [SerializeField] private float gravity;
@@ -19,8 +21,27 @@ public class PlayerMovementController : MonoBehaviour
     [Header("Slide Parameters")]
     [SerializeField] private float groundAngle;
     [SerializeField] private Vector3 slideDirectionVelocity;
-    public Boolean isSliding;
+    public bool isSliding;
+    private bool sphereCast;
+    private RaycastHit hit;
+    private float dotProduct;
 
+    [Header("Roll Parameters")]
+    private const float rollSpeed = 10f;
+    private const float rollDuration = 0.65f;
+    private const float rollCooldown = 0.65f;
+    public bool isRolling;
+    public bool rollAnimation;
+    private float rollTimer;
+    private float rollCooldownTimer;
+    private Vector3 rollDirection;
+
+    private const float MIN_SPEED = 4f;
+    private const float WALK_SPEED = 7.5f;
+    private const float RUN_SPEED = 12.5f;
+    private const float SLOPE = 35f;
+    private const float SLIDE_SPEED_LIMIT = 17.5f;
+    private const float ROTATION_SPEED = 10f; // Added for smoother rotation
 
     void Start()
     {
@@ -30,93 +51,211 @@ public class PlayerMovementController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+        // Cache input values
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        float verticalInput = Input.GetAxisRaw("Vertical");
+        bool isCrouching = Input.GetKey(KeyCode.C);
+        bool isJumping = Input.GetButtonDown("Jump");
+        bool isRollingInput = Input.GetKey(KeyCode.LeftControl);
+
+        UpdateGroundAngle();
+
+        if (isRolling)
         {
-            var forwardMovement = DirectionMovement();
-            var directionMovement = new Vector3(forwardMovement.x, VerticalMovement().y, forwardMovement.z);
+            rollAnimation = false;
+            HandleRoll(isJumping);
+        }
+        else
+        {
+            if (rollCooldownTimer > 0f)
+            {
+                rollCooldownTimer -= Time.deltaTime;
+            }
+
+            if (isRollingInput && rollCooldownTimer <= 0f && characterController.isGrounded && !isSliding)
+            {
+                rollAnimation = true;
+                Vector3 direction = new Vector3(horizontalInput, 0f, verticalInput).normalized;
+                StartRoll(direction);
+            }
+            else
+            {
+                HandleMovement(horizontalInput, verticalInput, isCrouching, isJumping);
+            }
+        }
+    }
+
+    private void HandleMovement(float horizontalInput, float verticalInput, bool isCrouching, bool isJumping)
+    {
+        if (horizontalInput != 0 || verticalInput != 0)
+        {
+            Vector3 forwardMovement = DirectionMovement(horizontalInput, verticalInput, isCrouching);
+            Vector3 directionMovement = new Vector3(forwardMovement.x, VerticalMovement(isJumping, isCrouching).y, forwardMovement.z);
             characterController.Move(directionMovement * Time.deltaTime);
         }
         else
         {
-            characterController.Move(VerticalMovement() * Time.deltaTime);
-            currentSpeed = 7.5f;
+            characterController.Move(VerticalMovement(isJumping, isCrouching) * Time.deltaTime);
+            currentSpeed = MIN_SPEED;
+            isWalkingUphill = false;
         }
     }
 
-    private Vector3 DirectionMovement()
+    //Check ground angle
+    private void UpdateGroundAngle()
     {
-        Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical")).normalized;
-        float speed = GetSpeed(direction);
-        velocity =
-            //slide movement
-            groundAngle > characterController.slopeLimit && direction.magnitude != 0f ? ForwardMovement(direction) * speed * .6f + slideDirectionVelocity
-            //walk jump movement
-            : onAirDirectionVelocity != Vector3.zero ? ForwardMovement(direction) * speed * .3f + onAirDirectionVelocity * speed * .7f
-            //idle jump movement
-            : direction.magnitude != 0f && !characterController.isGrounded ? ForwardMovement(direction) * speed * .6f
-            //normal movement
-            : direction.magnitude != 0f ? ForwardMovement(direction) * speed
-            //idle
-            : Vector3.zero;
+        if (characterController.isGrounded)
+        {
+            Vector3 castOrigin = transform.position - new Vector3(0f, characterController.height / 2 - characterController.radius - characterController.center.y, 0f);
+            sphereCast = Physics.SphereCast(castOrigin, characterController.radius - 0.01f, Vector3.down,
+                out hit, castOrigin.y + 0.01f, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+            groundAngle = Vector3.Angle(Vector3.up, hit.normal);
+        }
+    }
+
+    private Vector3 DirectionMovement(float horizontalInput, float verticalInput, bool isCrouching)
+    {
+        Vector3 direction = GetMovementDirection(new Vector3(horizontalInput, 0f, verticalInput).normalized);
+        float speed = GetSpeed(direction, isCrouching);
+        dotProduct = Vector3.Dot(direction, hit.normal);
+
+        velocity = CalculateVelocity(direction, speed, isCrouching);
         return velocity;
     }
 
-    private Vector3 ForwardMovement(Vector3 dir)
+    private Vector3 CalculateVelocity(Vector3 direction, float speed, bool isCrouching)
     {
-        float targetAngle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + camTransform.eulerAngles.y; //Angle relative to cam
+        if (groundAngle > characterController.slopeLimit && direction.magnitude != 0f)
+        {
+            return direction * speed * 0.6f + slideDirectionVelocity; // slide slope movement
+        }
+        if (groundAngle > 35 && isCrouching && dotProduct > 0f && direction.magnitude != 0f && !isRolling)
+        {
+            return direction * speed * 0.6f + slideDirectionVelocity; // slide forced movement
+        }
+        if (onAirDirectionVelocity != Vector3.zero)
+        {
+            return direction * speed * 0.3f + onAirDirectionVelocity * speed * 0.7f; // walk jump movement
+        }
+        if (direction.magnitude != 0f && !characterController.isGrounded)
+        {
+            return direction * speed * 0.6f; // idle jump movement
+        }
+        if (direction.magnitude != 0f)
+        {
+            return direction * speed; // walking movement
+        }
+        return Vector3.zero; // idle
+    }
+
+    private Vector3 GetMovementDirection(Vector3 direction)
+    {
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + camTransform.eulerAngles.y; //Angle relative to cam
         Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
         if (!isSliding)
         {
-            Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, .07f);
+            RotatePlayerTowards(targetAngle);
         }
 
         return moveDir.normalized;
     }
 
-    private float GetSpeed(Vector3 direction)
+    private void StartRoll(Vector3 direction)
     {
-        //Change speed
-        if (characterController.isGrounded)
+        isRolling = true;
+        rollTimer = rollDuration;
+        rollCooldownTimer = rollCooldown;
+        rollDirection = GetMovementDirection(direction);
+
+        if (rollDirection == Vector3.zero) // If no movement input, roll forward
         {
-            //Crouch Movement
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                currentSpeed = Mathf.Clamp(currentSpeed -= currentSpeed * 4f * Time.deltaTime, 4f, 12.5f);
-            }
-            //Run Movement
-            else
-            {
-                currentSpeed = Mathf.Clamp(Input.GetKey(KeyCode.LeftShift) && direction != Vector3.zero ? currentSpeed += currentSpeed * 2f * Time.deltaTime : currentSpeed -= currentSpeed * 2f * Time.deltaTime, 7.5f, 12.5f);
-            }
+            rollDirection = transform.forward;
         }
 
+        float targetAngle = Mathf.Atan2(rollDirection.x, rollDirection.z) * Mathf.Rad2Deg;
+        RotatePlayerTowards(targetAngle);
+    }
+
+    private void HandleRoll(bool isJumping)
+    {
+        //Jump while rolling
+        if (isJumping)
+        {
+            isRolling = false;
+            Vector3 forwardMovement = DirectionMovement(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), false);
+            characterController.Move(new Vector3(rollDirection.x + forwardMovement.x * rollSpeed, VerticalMovement(isJumping, false).y, rollDirection.z + forwardMovement.z * rollSpeed) * Time.deltaTime);
+        }
+        else if (rollTimer > 0)
+        {
+            rollDirection.y = VerticalMovement(false, false).y;
+            characterController.Move(rollDirection * rollSpeed * Time.deltaTime);
+            rollTimer -= Time.deltaTime;
+        }
+        else
+        {
+            isRolling = false;
+        }
+    }
+
+    private void RotatePlayerTowards(float targetAngle)
+    {
+        Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
+        if (isRolling)
+        {
+            transform.rotation = targetRotation;
+        }
+        else
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, ROTATION_SPEED * Time.deltaTime);
+        }
+    }
+
+    private float GetSpeed(Vector3 direction, bool isCrouching)
+    {
+        if (!characterController.isGrounded) return currentSpeed;
+
+        if (isCrouching && direction != Vector3.zero)
+        {
+            isWalkingUphill = false;
+            currentSpeed = Mathf.Max(MIN_SPEED, currentSpeed - currentSpeed * 2f * Time.deltaTime);
+        }
+        else if (dotProduct < 0f && groundAngle > SLOPE && direction != Vector3.zero)
+        {
+            isWalkingUphill = true;
+            currentSpeed = Mathf.Max(MIN_SPEED, currentSpeed - currentSpeed * 2f * Time.deltaTime);
+        }
+        else
+        {
+            isWalkingUphill = false;
+            float targetSpeed = Input.GetKey(KeyCode.LeftShift) && direction != Vector3.zero ? RUN_SPEED : WALK_SPEED;
+            currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, 2f * Time.deltaTime);
+        }
         return currentSpeed;
     }
 
-    private Vector3 VerticalMovement()
+    private Vector3 VerticalMovement(bool isJumping, bool isCrouching)
     {
         if (characterController.isGrounded)
         {
-            Vector3 castOrigin = transform.position - new Vector3(0f, characterController.height / 2 - characterController.radius - characterController.center.y, 0f);
-            var sphereCast = Physics.SphereCast(castOrigin, characterController.radius - .01f, Vector3.down,
-                out var hit, castOrigin.y + 0.01f, ~LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
-            groundAngle = Vector3.Angle(Vector3.up, hit.normal);
-            if (sphereCast && groundAngle > characterController.slopeLimit)
+            bool shouldSlide = (sphereCast && groundAngle > characterController.slopeLimit) || 
+                               (sphereCast && groundAngle > 35 && isCrouching && (velocity.Equals(Vector3.zero) || dotProduct > 0f));
+
+            if (shouldSlide)
             {
-                velocity = SlideMovement(hit);
+                velocity = SlideMovement();
                 isSliding = true;
-                if (Input.GetButtonDown("Jump"))
+                if (isJumping && !isRolling)
                 {
-                    jumpVelocity = Mathf.Sqrt(jumpHeight * -1.5f * gravity);
                     isSliding = false;
+                    jumpVelocity = Mathf.Sqrt(jumpHeight * -1.5f * gravity);
                 }
             }
             else
             {
                 isSliding = false;
                 slideDirectionVelocity = Vector3.zero;
-                if (Input.GetButtonDown("Jump"))
+                if (isJumping)
                 {
                     jumpVelocity = Mathf.Sqrt(jumpHeight * -4f * gravity);
                     onAirDirectionVelocity = velocity.normalized;
@@ -132,15 +271,15 @@ public class PlayerMovementController : MonoBehaviour
         return velocity;
     }
 
-    public Vector3 SlideMovement(RaycastHit hit)
+    public Vector3 SlideMovement()
     {
-        if (Mathf.Abs(slideDirectionVelocity.x) < 17.5f && Mathf.Abs(slideDirectionVelocity.z) < 17.5f)
+        if (Mathf.Abs(slideDirectionVelocity.x) < SLIDE_SPEED_LIMIT && Mathf.Abs(slideDirectionVelocity.z) < SLIDE_SPEED_LIMIT && !isRolling)
         {
             float slideDirectionX = (1f - hit.normal.y) * hit.normal.x;
             float slideDirectionZ = (1f - hit.normal.y) * hit.normal.z;
             slideDirectionVelocity.x += slideDirectionX;
             slideDirectionVelocity.z += slideDirectionZ;
-            transform.rotation = Quaternion.Euler(slideDirectionVelocity);
+            RotatePlayerTowards(Mathf.Atan2(slideDirectionVelocity.x, slideDirectionVelocity.z) * Mathf.Rad2Deg);
         }
 
         return new Vector3(slideDirectionVelocity.x, velocity.y, slideDirectionVelocity.z);
@@ -148,7 +287,10 @@ public class PlayerMovementController : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        velocity = groundAngle > characterController.slopeLimit ? velocity : Vector3.zero;
+        if (groundAngle <= characterController.slopeLimit)
+        {
+            velocity = Vector3.zero;
+        }
         onAirDirectionVelocity = Vector3.zero;
     }
 }
