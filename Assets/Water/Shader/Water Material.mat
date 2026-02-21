@@ -47,19 +47,19 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FoamAmount: 5
+    - _FoamAmount: 0.25
     - _FoamCutoff: 1.1
-    - _FoamScale: 200
-    - _FoamSpeed: 0.5
+    - _FoamScale: 0.75
+    - _FoamSpeed: 0.15
     - _HighFrequency: 0
-    - _NoiseScale: 0.005
+    - _NoiseScale: 0.0005
     - _NormalStrength: 10
     - _QueueControl: 0
     - _RefractionSpeed: 0.02
     - _RefractionStrength: 5
-    - _Smoothness: 0.6
-    - _WaterDepth: 150
-    - _WaveSpeed: 0.001
+    - _Smoothness: 0.5
+    - _WaterDepth: 20
+    - _WaveSpeed: 0.02
     m_Colors:
     - _DeepWater: {r: 0.058823533, g: 0.36862746, b: 0.6117647, a: 0.8}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 0.9490196}

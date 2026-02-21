@@ -12,15 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52423178118bcee41a6c94db8db4f5ea, type: 3}
   m_Name: Forest
   m_EditorClassIdentifier: Assembly-CSharp::BiomeSettings
-  biomeName: 
+  biomeName: Forest
   startDistance: 0
+  voronoiWeight: 30
   heightMapSettings: {fileID: 11400000, guid: d49e775dac25da346b5ac52a2e5d3f79, type: 2}
-  treePrefabs:
-  - {fileID: 9069115365609291303, guid: 60f79905accf3b24fa0114b941f1aac0, type: 3}
-  - {fileID: 4661435515762455780, guid: e289bf5debb17f6459818c207d781953, type: 3}
-  - {fileID: 2222111361404534124, guid: 88f2fd29f58b9734683512546acec310, type: 3}
-  - {fileID: 108507113624723981, guid: eebb56c82efbd8d4bb0eb6bd925a0e9d, type: 3}
-  treeDensity: 20
-  wildlifePrefabs:
-  - {fileID: 0}
+  material: {fileID: 2100000, guid: 4921ffeeb1175c84fbd2881f04ee5b48, type: 2}
+  treePrefabs: []
+  treeDensity: 1
+  wildlifePrefabs: []
   wildlifeDensity: 0.01

@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22f4d8c90af739243b41b2b2deeb4282, type: 3}
+  m_Name: VolumetricTerrainSettings
+  m_EditorClassIdentifier: Assembly-CSharp::VolumetricTerrainSettings
+  isoLevel: 0
+  voxelsPerAxis: 40
+  useSimpleTuning: 1
+  featureSize: 450
+  domainWarpAmount: 0.5
+  overhangAmount: 1
+  caveAmount: 0.9
+  biasCavesUnderwater: 1
+  islandsAmount: 0.3
+  islandsSize: 2
+  islandsRarity: 0.5
+  islandsTopFlatness: 0.9
+  islandsUndersideRoughness: 1
+  terrainTerraceHeight: 1
+  terrainTerraceBlend: 0.25
+  minWorldY: -400
+  maxWorldY: 800
+  surfaceDensityMultiplier: 1
+  densityMode: 1
+  enableOverhangs: 1
+  overhangStrength: 40
+  overhangNoise:
+    frequency: 0.004
+    octaves: 4
+    persistence: 0.5
+    lacunarity: 2
+    offset: {x: 0, y: 0, z: 0}
+  enableDomainWarp: 1
+  domainWarpStrength: 35
+  domainWarpNoise:
+    frequency: 0.0035
+    octaves: 2
+    persistence: 0.5
+    lacunarity: 2
+    offset: {x: 0, y: 0, z: 0}
+  enableCaves: 1
+  caveStrength: 30
+  caveThreshold: 0.6
+  caveSoftness: 5
+  caveNoise:
+    frequency: 0.001
+    octaves: 4
+    persistence: 0.5
+    lacunarity: 2
+    offset: {x: 0, y: 0, z: 0}
+  enableFloatingIslands: 1
+  islandsStrength: 300
+  islandsThreshold: 0.25
+  islandsSoftness: 3
+  islandsMinY: 250
+  islandsMaxY: 750
+  islandsBandBlend: 90
+  islandsNoise:
+    frequency: 0.02
+    octaves: 4
+    persistence: 0.5
+    lacunarity: 2
+    offset: {x: 0, y: 0, z: 0}
+  earlyOutEmptyChunks: 1
+  emptyChunkProbeResolution: 6

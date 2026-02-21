@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52423178118bcee41a6c94db8db4f5ea, type: 3}
   m_Name: Swamp
   m_EditorClassIdentifier: Assembly-CSharp::BiomeSettings
-  biomeName: 
-  startDistance: 200
-  heightMapSettings: {fileID: 11400000, guid: d49e775dac25da346b5ac52a2e5d3f79, type: 2}
-  treePrefabs:
-  - {fileID: 4661435515762455780, guid: e289bf5debb17f6459818c207d781953, type: 3}
-  - {fileID: 6941765000743290380, guid: c60edd51c065ceb46b345849a03bc106, type: 3}
-  - {fileID: 2807449429036958551, guid: f0c16f0ea935ea64297ca1d4d55d9746, type: 3}
-  treeDensity: 1.36
-  wildlifePrefabs:
-  - {fileID: 5984911598340929997, guid: 5228c984e5be7284d8d83c18096254dd, type: 3}
+  biomeName: Swamp
+  startDistance: 1000
+  voronoiWeight: 30
+  excludeFromVoronoiSelection: 0
+  material: {fileID: 2100000, guid: 8deed0d85687e08488e00f56bb869095, type: 2}
+  treePrefabs: []
+  treeDensity: 1
+  wildlifePrefabs: []
   wildlifeDensity: 0.01

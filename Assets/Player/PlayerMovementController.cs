@@ -38,7 +38,7 @@ public class PlayerMovementController : MonoBehaviour
 
     private const float MIN_SPEED = 4f;
     private const float WALK_SPEED = 7.5f;
-    private const float RUN_SPEED = 12.5f;
+    private const float RUN_SPEED = 50.5f;
     private const float SLOPE = 35f;
     private const float SLIDE_SPEED_LIMIT = 17.5f;
     private const float ROTATION_SPEED = 10f; // Added for smoother rotation
@@ -238,7 +238,7 @@ public class PlayerMovementController : MonoBehaviour
     {
         if (characterController.isGrounded)
         {
-            bool shouldSlide = (sphereCast && groundAngle > characterController.slopeLimit) || 
+            bool shouldSlide = (sphereCast && groundAngle > characterController.slopeLimit) ||
                                (sphereCast && groundAngle > 35 && isCrouching && (velocity.Equals(Vector3.zero) || dotProduct > 0f));
 
             if (shouldSlide)
